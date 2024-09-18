@@ -1,0 +1,22 @@
+---
+const { children } = Astro.props;
+---
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mi Proyecto Astro</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+  </head>
+  <body class="bg-gray-100 text-gray-900">
+    <header class="bg-blue-600 text-white p-4">
+      <h1 class="text-center text-2xl">Bienvenido a Mi Proyecto</h1>
+    </header>
+    <main class="p-6">
+      {children}
+    </main>
+    <footer class="bg-blue-600 text-white p-4 text-center">
+      <p>&copy; 2024 Mi Proyecto Astro</p>
+    </footer>
+  </body>
+</html>
