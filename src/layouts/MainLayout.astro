@@ -1,5 +1,31 @@
 ---
-const { title = 'Mi Aplicación' } = Astro.props;
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+type Link = {
+  href: string;
+  label: string;
+};
+
+type SocialLink = {
+  href: string;
+  label: string;
+};
+
+const { title = 'Mi Aplicación' }: { title?: string } = Astro.props;
+
+const links: Link[] = [
+  { href: '/', label: 'Inicio' },
+  { href: '/login', label: 'Login' },
+  { href: '/welcome', label: 'Bienvenida' },
+  { href: '/contact', label: 'Contacto' }
+];
+
+const socialLinks: SocialLink[] = [
+  { href: '#', label: 'Facebook' },
+  { href: '#', label: 'Twitter' },
+  { href: '#', label: 'Instagram' }
+];
 ---
 
 <!DOCTYPE html>
@@ -10,18 +36,11 @@ const { title = 'Mi Aplicación' } = Astro.props;
   <title>{title}</title>
   <link rel="stylesheet" href="/styles/tailwind.css">
 </head>
-<body>
-  <header>
-    <nav>
-      <a href="/">Inicio</a>
-      <a href="/login">Login</a>
-    </nav>
-  </header>
-  <main>
+<body class="bg-gray-100 text-gray-900">
+  <Header links={links} />
+  <main class="container mx-auto p-6">
     <slot /> <!-- Aquí se renderiza el contenido de las páginas -->
   </main>
-  <footer>
-    <p>&copy; 2024 Mi Aplicación</p>
-  </footer>
+  <Footer socialLinks={socialLinks} />
 </body>
 </html>

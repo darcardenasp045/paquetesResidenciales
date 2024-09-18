@@ -1,0 +1,19 @@
+---
+type SocialLink = {
+  href: string;
+  label: string;
+};
+
+const { socialLinks }: { socialLinks: SocialLink[] } = Astro.props;
+---
+
+<footer class="bg-blue-800 text-white mt-8 py-4 shadow-md">
+  <div class="container mx-auto flex justify-between items-center">
+    <p class="text-sm">&copy; 2024 Mi Aplicación</p>
+    <div class="space-x-4">
+      {socialLinks.map((link: SocialLink) => (
+        <a href={link.href} class="text-lg hover:text-blue-300 transition" key={link.href}>{link.label}</a>
+      ))}
+    </div>
+  </div>
+</footer>
