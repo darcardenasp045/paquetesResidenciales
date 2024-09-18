@@ -1,22 +1,27 @@
 ---
-const { children } = Astro.props;
+const { title = 'Mi Aplicación' } = Astro.props;
 ---
+
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mi Proyecto Astro</title>
-    <link rel="stylesheet" href="/src/styles/global.css" />
-  </head>
-  <body class="bg-gray-100 text-gray-900">
-    <header class="bg-blue-600 text-white p-4">
-      <h1 class="text-center text-2xl">Bienvenido a Mi Proyecto</h1>
-    </header>
-    <main class="p-6">
-      {children}
-    </main>
-    <footer class="bg-blue-600 text-white p-4 text-center">
-      <p>&copy; 2024 Mi Proyecto Astro</p>
-    </footer>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  <link rel="stylesheet" href="/styles/tailwind.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/">Inicio</a>
+      <a href="/login">Login</a>
+    </nav>
+  </header>
+  <main>
+    <slot /> <!-- Aquí se renderiza el contenido de las páginas -->
+  </main>
+  <footer>
+    <p>&copy; 2024 Mi Aplicación</p>
+  </footer>
+</body>
 </html>
