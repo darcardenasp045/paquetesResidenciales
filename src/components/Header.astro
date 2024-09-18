@@ -1,0 +1,19 @@
+---
+type Link = {
+  href: string;
+  label: string;
+};
+
+const { links }: { links: Link[] } = Astro.props;
+---
+
+<header class="bg-blue-800 text-white shadow-md">
+  <nav class="container mx-auto flex justify-between items-center p-4">
+    <a href="/" class="text-3xl font-bold hover:text-blue-300 transition">Mi Aplicación</a>
+    <ul class="flex space-x-6">
+      {links.map((link: Link) => (
+        <li key={link.href}><a href={link.href} class="text-lg hover:text-blue-300 transition">{link.label}</a></li>
+      ))}
+    </ul>
+  </nav>
+</header>
