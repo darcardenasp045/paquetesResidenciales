@@ -1,58 +1,69 @@
 ---
-import MainLayout from "../layouts/MainLayout.astro" // Asegúrate de tener un layout si lo necesitas
+const token = Astro.request.headers.get('Authorization')?.replace('Bearer ', '');
+
+if (!token) {
+  return new Response('<p>You are not authorized to view this page.</p>', {
+    status: 401,
+    headers: { 'Content-Type': 'text/html' },
+  });
+}
+
+// Fetch de la API para obtener los paquetes
+const response = await fetch('http://localhost:5000/api/packages', {
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'  // Asegúrate de incluir este header
+  },
+});
+
+let packages = [];
+let errorMessage = '';
+
+if (!response.ok) {
+  const errorData = await response.json();
+  errorMessage = `Error: ${errorData.error}`;
+} else {
+  const data = await response.json();
+  packages = Array.isArray(data) ? data : [];
+}
 ---
 
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="/path/to/tailwind.css" />
-  </head>
-  <body class="bg-gray-100">
-    <MainLayout>
-      <main class="container mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-4">Dashboard</h1>
-        <div class="bg-white shadow rounded p-4">
-          <h2 class="text-xl mb-2">Paquetes Registrados</h2>
-          <table class="min-w-full border">
-            <thead>
-              <tr>
-                <th class="border-b p-2">ID</th>
-                <th class="border-b p-2">Nombre del Paquete</th>
-                <th class="border-b p-2">Destinatario</th>
-                <th class="border-b p-2">Estado</th>
-              </tr>
-            </thead>
-            <tbody id="package-table-body">
-              <!-- Aquí puedes insertar las filas dinámicamente -->
-            </tbody>
-          </table>
-        </div>
-      </main>
-
-      <script>
-        // Función para cargar los paquetes desde la API
-        async function loadPackages() {
-          const response = await fetch('http://localhost:5000/api/packages'); // Cambia la ruta según tu API
-          const packages = await response.json();
-          const tableBody = document.getElementById('package-table-body');
-
-          packages.forEach(pkg => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td class="border-b p-2">${pkg.id}</td>
-              <td class="border-b p-2">${pkg.name}</td>
-              <td class="border-b p-2">${pkg.recipient}</td>
-              <td class="border-b p-2">${pkg.status}</td>
-            `;
-            tableBody.appendChild(row);
-          });
-        }
-
-        // Cargar los paquetes al iniciar
-        document.addEventListener('DOMContentLoaded', loadPackages);
-      </script>
-    </MainLayout>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/path/to/tailwind.css" />
+</head>
+<body class="bg-gray-100">
+  <main class="container mx-auto p-6">
+    <h2 class="text-2xl mb-4">Packages</h2>
+    {errorMessage ? (
+      <p>{errorMessage}</p>
+    ) : (
+      <table class="min-w-full bg-white border border-gray-300">
+        <thead>
+          <tr>
+            <th class="border px-4 py-2">Tracking Number</th>
+            <th class="border px-4 py-2">Recipient Name</th>
+            <th class="border px-4 py-2">Apartment Number</th>
+            <th class="border px-4 py-2">Arrival Date</th>
+            <th class="border px-4 py-2">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {packages.map(pkg => (
+            <tr key={pkg.id}>
+              <td class="border px-4 py-2">{pkg.tracking_number}</td>
+              <td class="border px-4 py-2">{pkg.recipient_name}</td>
+              <td class="border px-4 py-2">{pkg.apartment_number}</td>
+              <td class="border px-4 py-2">{new Date(pkg.arrival_date).toLocaleString()}</td>
+              <td class="border px-4 py-2">{pkg.status}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </main>
+</body>
 </html>
