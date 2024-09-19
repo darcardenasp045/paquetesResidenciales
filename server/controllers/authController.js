@@ -2,46 +2,57 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db from '../db.js';
 
-// Registro de usuario
-export const register = async (req, res) => {
-    const { username, password } = req.body;
+// Controlador de registro
+export const registerUser = async (req, res) => {
+  const { username, password } = req.body;
 
-    try {
-        const [existingUser] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
-
-        if (existingUser.length > 0) {
-            return res.status(400).json({ message: 'Usuario ya existe' });
-        }
-
-        const hashedPassword = bcrypt.hashSync(password, 10);
-
-        await db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
-
-        res.status(201).json({ message: 'Usuario registrado con éxito' });
-    } catch (err) {
-        res.status(500).json({ message: 'Error al registrar el usuario', error: err.message });
+  try {
+    // Validar si el usuario ya existe
+    const [existingUser] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
+    if (existingUser.length > 0) {
+      return res.status(400).json({ error: 'User already exists' });
     }
+
+    // Encriptar la contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Guardar el usuario en la base de datos
+    await db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
+
+    return res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+    console.error('Error registering user:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 };
 
-// Login de usuario
-export const login = async (req, res) => {
-    const { username, password } = req.body;
+// Controlador de login
+export const loginUser = async (req, res) => {
+  const { username, password } = req.body;
 
-    try {
-        const [users] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
+  try {
+    // Verificar si el usuario existe
+    const [user] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
 
-        if (users.length === 0) {
-            return res.status(400).json({ message: 'Usuario no encontrado' });
-        }
-
-        const user = users[0];
-        const isMatch = bcrypt.compareSync(password, user.password);
-
-        if (!isMatch) return res.status(400).json({ message: 'Contraseña incorrecta' });
-
-        const token = jwt.sign({ id: user.id }, 'secreto_para_token', { expiresIn: '1h' });
-        res.json({ token, message: 'Inicio de sesión exitoso' });
-    } catch (err) {
-        res.status(500).json({ message: 'Error al iniciar sesión', error: err.message });
+    if (user.length === 0) {
+      return res.status(400).json({ error: 'User not found' });
     }
+
+    // Verificar la contraseña
+    const isMatch = await bcrypt.compare(password, user[0].password);
+
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+
+    // Crear el token JWT
+    const token = jwt.sign({ id: user[0].id }, process.env.JWT_SECRET, {
+      expiresIn: '1h', // Expiración de 1 hora
+    });
+
+    return res.status(200).json({ token });
+  } catch (error) {
+    console.error('Error logging in user:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 };

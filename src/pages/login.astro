@@ -1,8 +1,116 @@
----
-import LoginForm from '../components/LoginForm'
----
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="stylesheet" href="/path/to/tailwind.css" />
+  </head>
+  <body class="bg-gray-100">
+    <main class="container mx-auto p-6">
+      <!-- Formulario de Login -->
+      <div id="loginForm" class="max-w-sm mx-auto bg-white p-6 rounded shadow-lg">
+        <h2 class="text-center text-2xl mb-4">Login</h2>
+        <form id="login-form">
+          <div class="mb-4">
+            <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+            <input type="text" id="login-username" name="username" class="w-full p-2 border rounded-md" required />
+          </div>
+          <div class="mb-4">
+            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+            <input type="password" id="login-password" name="password" class="w-full p-2 border rounded-md" required />
+          </div>
+          <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded-md">Login</button>
+        </form>
+        <p class="text-center mt-4">
+          Don't have an account? <span class="text-blue-500 cursor-pointer" id="toggleRegister">Register</span>
+        </p>
+      </div>
 
-<main class="container mx-auto p-6">
-  <h1 class="text-2xl font-bold mb-4">Login</h1>
-  <LoginForm client:load />
-</main>
+      <!-- Formulario de Registro -->
+      <div id="registerForm" class="max-w-sm mx-auto bg-white p-6 rounded shadow-lg hidden">
+        <h2 class="text-center text-2xl mb-4">Register</h2>
+        <form id="register-form">
+          <div class="mb-4">
+            <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+            <input type="text" id="register-username" name="username" class="w-full p-2 border rounded-md" required />
+          </div>
+          <div class="mb-4">
+            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+            <input type="password" id="register-password" name="password" class="w-full p-2 border rounded-md" required />
+          </div>
+          <button type="submit" class="w-full bg-green-500 text-white p-2 rounded-md">Register</button>
+        </form>
+        <p class="text-center mt-4">
+          Already have an account? <span class="text-blue-500 cursor-pointer" id="toggleLogin">Login</span>
+        </p>
+      </div>
+    </main>
+
+    <script>
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      const toggleRegister = document.getElementById('toggleRegister');
+      const toggleLogin = document.getElementById('toggleLogin');
+
+      toggleRegister.addEventListener('click', () => {
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+      });
+
+      toggleLogin.addEventListener('click', () => {
+        registerForm.classList.add('hidden');
+        loginForm.classList.remove('hidden');
+      });
+
+      // Manejo del formulario de login
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+
+        const response = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem('token', data.token); // Guardamos el token
+          alert('Login successful');
+          // Redirigir a la página protegida
+          window.location.href = '/dashboard'; 
+        } else {
+          alert(data.error);
+        }
+      });
+
+      // Manejo del formulario de registro
+      document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('register-username').value;
+        const password = document.getElementById('register-password').value;
+
+        const response = await fetch('http://localhost:5000/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert('Registration successful. You can now login.');
+          toggleLogin.click(); // Cambia al formulario de login
+        } else {
+          alert(data.error);
+        }
+      });
+    </script>
+  </body>
+</html>
