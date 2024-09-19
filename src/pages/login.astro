@@ -68,23 +68,28 @@
         const username = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
 
-        const response = await fetch('http://localhost:5000/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username, password }),
-        });
+        try {
+          const response = await fetch('http://localhost:5000/api/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password }),
+          });
 
-        const data = await response.json();
+          const data = await response.json();
 
-        if (response.ok) {
-          localStorage.setItem('token', data.token); // Guardamos el token
-          alert('Login successful');
-          // Redirigir a la página protegida
-          window.location.href = '/dashboard'; 
-        } else {
-          alert(data.error);
+          if (response.ok) {
+            localStorage.setItem('token', data.token); // Guardamos el token
+            alert('Login successful');
+            // Redirigir a la página protegida
+            window.location.href = '/dashboard'; 
+          } else {
+            alert(data.error);
+          }
+        } catch (error) {
+          console.error('Error logging in:', error);
+          alert('Login failed, please try again.');
         }
       });
 
@@ -94,21 +99,26 @@
         const username = document.getElementById('register-username').value;
         const password = document.getElementById('register-password').value;
 
-        const response = await fetch('http://localhost:5000/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username, password }),
-        });
+        try {
+          const response = await fetch('http://localhost:5000/api/auth/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password }),
+          });
 
-        const data = await response.json();
+          const data = await response.json();
 
-        if (response.ok) {
-          alert('Registration successful. You can now login.');
-          toggleLogin.click(); // Cambia al formulario de login
-        } else {
-          alert(data.error);
+          if (response.ok) {
+            alert('Registration successful. You can now login.');
+            toggleLogin.click(); // Cambia al formulario de login
+          } else {
+            alert(data.error);
+          }
+        } catch (error) {
+          console.error('Error registering:', error);
+          alert('Registration failed, please try again.');
         }
       });
     </script>
