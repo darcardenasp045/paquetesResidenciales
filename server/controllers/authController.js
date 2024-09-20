@@ -23,24 +23,36 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// Controlador de login
 export const loginUser = async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    const [user] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
+    // Asegúrate de obtener solo el primer resultado en la consulta
+    const [users] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
 
-    if (user.length === 0) {
+    if (users.length === 0) {
       return res.status(400).json({ error: 'User not found' });
     }
 
-    const isMatch = await bcrypt.compare(password, user[0].password);
+    const user = users[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user[0].id }, JWT_SECRET, { expiresIn: '1h' });
-    return res.status(200).json({ token });
+    // Genera el token JWT
+    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1h' });
+
+    // Configura la cookie del token
+    res.cookie('token', token, {
+      httpOnly: true,   // La cookie no es accesible desde JavaScript del cliente
+      secure: process.env.NODE_ENV === 'production',  // Usa secure solo en producción (con HTTPS)
+      maxAge: 3600000,  // Expira en 1 hora
+      sameSite: 'strict'  // Mejora la seguridad en la transmisión
+    });
+
+    return res.status(200).json({ message: 'Login successful' });
   } catch (error) {
     console.error('Error logging in user:', error);
     return res.status(500).json({ error: 'Internal server error' });

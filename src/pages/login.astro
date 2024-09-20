@@ -75,15 +75,15 @@
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({ username, password }),
+            credentials: 'include', // Incluir credenciales para permitir el envío de cookies
           });
 
           const data = await response.json();
 
           if (response.ok) {
-            localStorage.setItem('token', data.token); // Guardamos el token
             alert('Login successful');
-            // Redirigir a la página protegida
-            window.location.href = '/dashboard'; 
+            // Redirigir a la página protegida (dashboard)
+            window.location.href = '/dashboard';
           } else {
             alert(data.error);
           }

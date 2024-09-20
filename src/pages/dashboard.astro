@@ -1,18 +1,19 @@
 ---
-const token = Astro.request.headers.get('Authorization')?.replace('Bearer ', '');
+const tokenCookie = Astro.cookies.get('token'); // Obtener el token desde la cookie
 
-if (!token) {
+// Verificar si el token existe
+if (!tokenCookie) {
   return new Response('<p>You are not authorized to view this page.</p>', {
     status: 401,
     headers: { 'Content-Type': 'text/html' },
   });
 }
 
-// Fetch de la API para obtener los paquetes
+// Fetch de la API para obtener los paquetes usando el token
 const response = await fetch('http://localhost:5000/api/packages', {
   headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'  // Asegúrate de incluir este header
+    'Authorization': `Bearer ${tokenCookie}`,  // Enviar el token en la cabecera
+    'Content-Type': 'application/json',
   },
 });
 
@@ -38,8 +39,10 @@ if (!response.ok) {
 <body class="bg-gray-100">
   <main class="container mx-auto p-6">
     <h2 class="text-2xl mb-4">Packages</h2>
+    
+    <!-- Mostrar mensaje de error si existe -->
     {errorMessage ? (
-      <p>{errorMessage}</p>
+      <p class="text-red-500">{errorMessage}</p>
     ) : (
       <table class="min-w-full bg-white border border-gray-300">
         <thead>
@@ -52,15 +55,21 @@ if (!response.ok) {
           </tr>
         </thead>
         <tbody>
-          {packages.map(pkg => (
-            <tr key={pkg.id}>
-              <td class="border px-4 py-2">{pkg.tracking_number}</td>
-              <td class="border px-4 py-2">{pkg.recipient_name}</td>
-              <td class="border px-4 py-2">{pkg.apartment_number}</td>
-              <td class="border px-4 py-2">{new Date(pkg.arrival_date).toLocaleString()}</td>
-              <td class="border px-4 py-2">{pkg.status}</td>
+          {packages.length > 0 ? (
+            packages.map(pkg => (
+              <tr>
+                <td class="border px-4 py-2">{pkg.tracking_number}</td>
+                <td class="border px-4 py-2">{pkg.recipient_name}</td>
+                <td class="border px-4 py-2">{pkg.apartment_number}</td>
+                <td class="border px-4 py-2">{new Date(pkg.arrival_date).toLocaleString()}</td>
+                <td class="border px-4 py-2">{pkg.status}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td class="border px-4 py-2" colspan="5">No packages found.</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     )}
